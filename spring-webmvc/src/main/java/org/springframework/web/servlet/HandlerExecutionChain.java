@@ -30,7 +30,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Handler execution chain, consisting of handler object and any handler interceptors.
+ * 处理器执行链。
+ * <p>Handler execution chain, consisting of handler object and any handler interceptors.
  * Returned by HandlerMapping's {@link HandlerMapping#getHandler} method.
  *
  * @author Juergen Hoeller
@@ -40,11 +41,21 @@ import org.springframework.util.CollectionUtils;
 public class HandlerExecutionChain {
 
 	private static final Log logger = LogFactory.getLog(HandlerExecutionChain.class);
-
+	/**
+	 * 处理器
+	 */
 	private final Object handler;
-
+	/**
+	 * 拦截器数组。
+	 *
+	 * 在实际使用时，会调用 {@link #getInterceptors()} 方法，初始化到 {@link #interceptors} 中
+	 */
 	private final List<HandlerInterceptor> interceptorList = new ArrayList<>();
-
+	/**
+	 * 已执行 {@link HandlerInterceptor#preHandle(HttpServletRequest, HttpServletResponse, Object)} 的位置
+	 *
+	 * 主要用于实现 {@link #applyPostHandle(HttpServletRequest, HttpServletResponse, ModelAndView)} 的逻辑
+	 */
 	private int interceptorIndex = -1;
 
 
@@ -135,7 +146,7 @@ public class HandlerExecutionChain {
 
 
 	/**
-	 * Apply preHandle methods of registered interceptors.
+	 * 应用拦截器的前置处理器
 	 * @return {@code true} if the execution chain should proceed with the
 	 * next interceptor or the handler itself. Else, DispatcherServlet assumes
 	 * that this interceptor has already dealt with the response itself.
@@ -143,39 +154,49 @@ public class HandlerExecutionChain {
 	boolean applyPreHandle(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		for (int i = 0; i < this.interceptorList.size(); i++) {
 			HandlerInterceptor interceptor = this.interceptorList.get(i);
+			// <3> 前置处理
 			if (!interceptor.preHandle(request, response, this.handler)) {
+				// <3.1> 触发已完成处理
 				triggerAfterCompletion(request, response, null);
+				// 返回 false ，前置处理失败
 				return false;
 			}
+			// <3.2> 标记 interceptorIndex 位置
 			this.interceptorIndex = i;
 		}
+		// <4> 返回 true ，前置处理成功
 		return true;
 	}
 
 	/**
-	 * Apply postHandle methods of registered interceptors.
+	 * 应用拦截器的后置处理
 	 */
 	void applyPostHandle(HttpServletRequest request, HttpServletResponse response, @Nullable ModelAndView mv)
 			throws Exception {
-
+		// 倒序!!!
 		for (int i = this.interceptorList.size() - 1; i >= 0; i--) {
 			HandlerInterceptor interceptor = this.interceptorList.get(i);
+			// 后置处理
 			interceptor.postHandle(request, response, this.handler, mv);
 		}
 	}
 
 	/**
-	 * Trigger afterCompletion callbacks on the mapped HandlerInterceptors.
+	 * 触发拦截器的已完成处理。
+	 * <p>Trigger afterCompletion callbacks on the mapped HandlerInterceptors.
 	 * Will just invoke afterCompletion for all interceptors whose preHandle invocation
 	 * has successfully completed and returned true.
 	 */
 	void triggerAfterCompletion(HttpServletRequest request, HttpServletResponse response, @Nullable Exception ex) {
+		// 倒序！！！
 		for (int i = this.interceptorIndex; i >= 0; i--) {
 			HandlerInterceptor interceptor = this.interceptorList.get(i);
 			try {
+				// 已完成处理
 				interceptor.afterCompletion(request, response, this.handler, ex);
 			}
 			catch (Throwable ex2) {
+				// 注意，如果执行失败，仅仅会打印错误日志，不会结束循环
 				logger.error("HandlerInterceptor.afterCompletion threw exception", ex2);
 			}
 		}

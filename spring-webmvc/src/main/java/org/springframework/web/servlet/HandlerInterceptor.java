@@ -23,7 +23,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.method.HandlerMethod;
 
 /**
- * Workflow interface that allows for customized handler execution chains.
+ * 处理器拦截器接口
+ * <p>Workflow interface that allows for customized handler execution chains.
  * Applications can register any number of existing or custom interceptors
  * for certain groups of handlers, to add common preprocessing behavior
  * without needing to modify each handler implementation.
@@ -75,7 +76,8 @@ import org.springframework.web.method.HandlerMethod;
 public interface HandlerInterceptor {
 
 	/**
-	 * Interception point before the execution of a handler. Called after
+	 * 拦截处理器，在 {@link HandlerAdapter#handle(HttpServletRequest, HttpServletResponse, Object)} 执行之前
+	 * <p>Interception point before the execution of a handler. Called after
 	 * HandlerMapping determined an appropriate handler object, but before
 	 * HandlerAdapter invokes the handler.
 	 * <p>DispatcherServlet processes a handler in an execution chain, consisting
@@ -101,7 +103,8 @@ public interface HandlerInterceptor {
 	}
 
 	/**
-	 * Interception point after successful execution of a handler.
+	 * 拦截处理器，在 {@link HandlerAdapter#handle(HttpServletRequest, HttpServletResponse, Object)} 执行成功之后
+	 * <p>Interception point after successful execution of a handler.
 	 * Called after HandlerAdapter actually invoked the handler, but before the
 	 * DispatcherServlet renders the view. Can expose additional model objects
 	 * to the view via the given ModelAndView.
@@ -126,7 +129,9 @@ public interface HandlerInterceptor {
 	}
 
 	/**
-	 * Callback after completion of request processing, that is, after rendering
+	 * 拦截处理器，在 {@link HandlerAdapter} 执行完之后，无论成功还是失败
+	 * 并且，只有 {@link #preHandle(HttpServletRequest, HttpServletResponse, Object)} 执行成功之后，才会被执行
+	 * <p>Callback after completion of request processing, that is, after rendering
 	 * the view. Will be called on any outcome of handler execution, thus allows
 	 * for proper resource cleanup.
 	 * <p>Note: Will only be called if this interceptor's {@code preHandle}

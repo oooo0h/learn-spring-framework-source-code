@@ -44,7 +44,8 @@ public interface MatchableHandlerMapping extends HandlerMapping {
 	}
 
 	/**
-	 * Determine whether the request matches the given pattern. Use this method
+	 * 判断请求和指定 `pattern` 路径是否匹配的接口方法
+	 * <p>Determine whether the request matches the given pattern. Use this method
 	 * when {@link #getPatternParser()} returns {@code null} which means that the
 	 * {@code HandlerMapping} is using String pattern matching.
 	 * @param request the current request

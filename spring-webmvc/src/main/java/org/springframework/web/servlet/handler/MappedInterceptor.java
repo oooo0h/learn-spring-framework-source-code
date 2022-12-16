@@ -37,6 +37,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
 import org.springframework.web.util.pattern.PatternParseException;
 
 /**
+ * <p>支持地址匹配的 HandlerInterceptor 实现类。</p>
  * Wraps a {@link HandlerInterceptor} and uses URL patterns to determine whether
  * it applies to a given request.
  *
@@ -63,15 +64,23 @@ public final class MappedInterceptor implements HandlerInterceptor {
 
 	private static PathMatcher defaultPathMatcher = new AntPathMatcher();
 
-
+	/**
+	 * 匹配的路径
+	 */
 	@Nullable
 	private final PatternAdapter[] includePatterns;
-
+	/**
+	 * 不匹配的路径
+	 */
 	@Nullable
 	private final PatternAdapter[] excludePatterns;
-
+	/**
+	 * 路径匹配器
+	 */
 	private PathMatcher pathMatcher = defaultPathMatcher;
-
+	/**
+	 * HandlerInterceptor 拦截器对象
+	 */
 	private final HandlerInterceptor interceptor;
 
 
@@ -177,6 +186,7 @@ public final class MappedInterceptor implements HandlerInterceptor {
 
 
 	/**
+	 * <p>判断路径是否匹配。</p>
 	 * Check whether this interceptor is mapped to the request.
 	 * <p>The request mapping path is expected to have been resolved externally.
 	 * See also class-level Javadoc.
@@ -184,6 +194,7 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	 * @return {@code true} if the interceptor should be applied to the request
 	 */
 	public boolean matches(HttpServletRequest request) {
+		// 获取缓存path
 		Object path = ServletRequestPathUtils.getCachedPath(request);
 		if (this.pathMatcher != defaultPathMatcher) {
 			path = path.toString();
